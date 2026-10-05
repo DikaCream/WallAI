@@ -9,7 +9,7 @@ that decision through the **Equivalence Principle**. You watch consensus happen 
 approved or rejected in place. On top of the wall: likes, AI-moderated replies, unique handles, a leaderboard, a
 public list of rejections, and a one-time **appeal** to a stricter AI reviewer.
 
-![WallAI wall](docs/wall.svg)
+![WallAI](https://wallai-eta.vercel.app/opengraph-image)
 
 | | |
 |---|---|
@@ -38,9 +38,10 @@ public list of rejections, and a one-time **appeal** to a stricter AI reviewer.
 - **Leaderboard.** Top posters by approved posts, then likes received, then replies.
 - **Open Graph / Twitter card** generated with `next/og` (`frontend/app/opengraph-image.tsx`).
 
-| Live status | Rejected tab | Leaderboard |
-|---|---|---|
-| ![Pending card](docs/pending.svg) | ![Rejected](docs/rejected.svg) | ![Leaderboard](docs/leaderboard.svg) |
+![Pending post with live consensus status (illustration)](docs/pending.svg)
+
+See the Wall, Rejected and Leaderboard tabs live at [wallai-eta.vercel.app](https://wallai-eta.vercel.app)
+(deep links: [`/#rejected`](https://wallai-eta.vercel.app/#rejected), [`/#leaderboard`](https://wallai-eta.vercel.app/#leaderboard)).
 
 ## How moderation works
 
@@ -99,7 +100,7 @@ scripts/lib.mjs               Shared helpers (clients, receipt inspection, reada
 deployments/                  Deployment records and e2e results (v1 files kept for history)
 frontend/                     Next.js 16 app (genlayer-js + MetaMask, React Query, Tailwind 4)
 docs/ci.yml                   CI workflow (genvm-lint, direct tests, frontend build)
-docs/                         Screenshots
+docs/                         Live-status illustration (pending.svg)
 ```
 
 ## Setup
