@@ -1,50 +1,263 @@
 {
-  "contract": "0x7cD9D77c23024D21868dA19F9FD4cE723aE2241b",
-  "wallet": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
-  "startedAt": "2026-10-05T01:13:44.906Z",
-  "posts": [
+  "contract": "0x8F98648c3569875267538236F58cA9056a8Cc596",
+  "walletA": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+  "walletB": "0x1A8De806617E27DdDE786013f162b499e777DBa8",
+  "finishedAt": "2026-10-05T02:38:08.265Z",
+  "steps": [
     {
-      "label": "clean",
-      "text": "Hello from WallAI! Excited to try an AI-moderated wall on GenLayer. Have a great day everyone :)",
-      "txHash": "0xa3164fbd17d3d3d03114b9c19e1b0a0748b67fa4d26d739565fe5954ac478da4",
-      "explorer": "https://explorer-studio.genlayer.com/transactions/0xa3164fbd17d3d3d03114b9c19e1b0a0748b67fa4d26d739565fe5954ac478da4",
+      "step": "A sets handle",
+      "method": "set_handle",
+      "txHash": "0xc4a49fcc39cc603fc4efacdb8b5a33d068cdbaa8edc6e86879af9c42d519fdd3",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xc4a49fcc39cc603fc4efacdb8b5a33d068cdbaa8edc6e86879af9c42d519fdd3",
       "statusName": "ACCEPTED",
       "consensusResult": "MAJORITY_AGREE",
       "executionResult": "SUCCESS",
-      "returnValue": "{\"approved\":true\"reason\":\"Friendly greeting with no policy violations\"}"
+      "returnValue": "{\"handle\":\"demo_bb9e\"}",
+      "parsed": {
+        "handle": "demo_bb9e"
+      },
+      "pass": true
     },
     {
-      "label": "abusive/spam",
-      "text": "SEND ME YOUR SEED PHRASE NOW to claim 1000x FREE CRYPTO!!! Click bit.ly/fr33-m0ney - you are all worthless idiots",
-      "txHash": "0x5be5f67210b52193d0b2e9c8881cde61526df1f02797146b44cb6010b4e86410",
-      "explorer": "https://explorer-studio.genlayer.com/transactions/0x5be5f67210b52193d0b2e9c8881cde61526df1f02797146b44cb6010b4e86410",
+      "step": "B sets handle",
+      "method": "set_handle",
+      "txHash": "0x42250641e0b810d888bef8a540c98a43939ab1d7dfe34164c0e81314d2ec72ad",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0x42250641e0b810d888bef8a540c98a43939ab1d7dfe34164c0e81314d2ec72ad",
       "statusName": "ACCEPTED",
       "consensusResult": "MAJORITY_AGREE",
       "executionResult": "SUCCESS",
-      "returnValue": "{\"approved\":false\"reason\":\"Contains scam/crypto phishing, a suspicious link, and insulting harassment.\"}"
+      "returnValue": "{\"handle\":\"friend_1a8de8\"}",
+      "parsed": {
+        "handle": "friend_1a8de8"
+      },
+      "pass": true
+    },
+    {
+      "step": "clean post",
+      "method": "post_message",
+      "txHash": "0xea5637d50f1c8551c14b30fccd749d0e77135d4cd474fe460095803fc4e2f93e",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xea5637d50f1c8551c14b30fccd749d0e77135d4cd474fe460095803fc4e2f93e",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"approved\":true\"id\":0\"reason\":\"The message is a polite greeting and test note with no prohibited content.\"}",
+      "parsed": {
+        "approved": true,
+        "id": 0,
+        "reason": "The message is a polite greeting and test note with no prohibited content."
+      },
+      "pass": true
+    },
+    {
+      "step": "abusive post",
+      "method": "post_message",
+      "txHash": "0xfbf4cfa1560db12f9f6b01a3288603eff079593c682049f16154cc47e17a06c5",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xfbf4cfa1560db12f9f6b01a3288603eff079593c682049f16154cc47e17a06c5",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"approved\":false\"id\":0\"reason\":\"Contains a scam/phishing crypto offer, suspicious link, and insulting language.\"}",
+      "parsed": {
+        "approved": false,
+        "id": 0,
+        "reason": "Contains a scam/phishing crypto offer, suspicious link, and insulting language."
+      },
+      "pass": true
+    },
+    {
+      "step": "borderline post",
+      "method": "post_message",
+      "txHash": "0x8d1d3babe9742b1cf7b63c97f8bc6d3a5a00f568bc50cd1ff38f8e08824f6f42",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0x8d1d3babe9742b1cf7b63c97f8bc6d3a5a00f568bc50cd1ff38f8e08824f6f42",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"approved\":true\"id\":1\"reason\":\"Sports hyperbole without a real threat, harassment, or prohibited content.\"}",
+      "parsed": {
+        "approved": true,
+        "id": 1,
+        "reason": "Sports hyperbole without a real threat, harassment, or prohibited content."
+      },
+      "pass": true
+    },
+    {
+      "step": "appeal abusive (expect denied)",
+      "method": "appeal",
+      "txHash": "0xab77f724d930835d8e69a98d4ad862b51d3677feca0038bb05745c4b5ae890f3",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xab77f724d930835d8e69a98d4ad862b51d3677feca0038bb05745c4b5ae890f3",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"message_id\":-1\"overturned\":false\"reason\":\"Clear crypto phishing scam with suspicious link and insulting users; uphold rejection.\"}",
+      "parsed": {
+        "message_id": -1,
+        "overturned": false,
+        "reason": "Clear crypto phishing scam with suspicious link and insulting users; uphold rejection."
+      },
+      "pass": true
+    },
+    {
+      "step": "B likes A's post",
+      "method": "like",
+      "txHash": "0xcce1b66f3aac6d2ae11cc8a73d956e0699d54a77b2cd3fbcae6a202257a704ea",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xcce1b66f3aac6d2ae11cc8a73d956e0699d54a77b2cd3fbcae6a202257a704ea",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"liked\":true\"likes\":1}",
+      "parsed": {
+        "liked": true,
+        "likes": 1
+      },
+      "pass": true
+    },
+    {
+      "step": "B replies",
+      "method": "reply",
+      "txHash": "0xc87ce98778f24ccf6d66ac40353a63875a25420e3f51312b2ad861caade7fe54",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xc87ce98778f24ccf6d66ac40353a63875a25420e3f51312b2ad861caade7fe54",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"approved\":true\"id\":0\"reason\":\"Positive polite message with no prohibited content.\"}",
+      "parsed": {
+        "approved": true,
+        "id": 0,
+        "reason": "Positive polite message with no prohibited content."
+      },
+      "pass": true
     }
   ],
-  "after": {
+  "views": {
     "stats": {
-      "approved": 1,
+      "appeals": 1,
+      "approved": 2,
+      "likes": 1,
+      "overturned": 0,
       "rejected": 1,
-      "total": 2
+      "rejected_replies": 0,
+      "replies": 1,
+      "total": 3,
+      "users": 2
     },
-    "messageCount": 1,
-    "latestMessages": [
+    "messages": [
       {
         "author": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+        "handle": "demo_bb9e",
+        "id": 1,
+        "likes": 0,
+        "reason": "Sports hyperbole without a real threat, harassment, or prohibited content.",
+        "rejected_id": -1,
+        "replies": 0,
+        "text": "We absolutely destroyed them last night, total massacre on the scoreboard. I'm going to murder that leaderboard next week \ud83c\udfc6",
+        "timestamp": 1791167838,
+        "via_appeal": false
+      },
+      {
+        "author": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+        "handle": "demo_bb9e",
         "id": 0,
-        "reason": "Friendly greeting with no policy violations",
-        "text": "Hello from WallAI! Excited to try an AI-moderated wall on GenLayer. Have a great day everyone :)",
-        "timestamp": 1791162826
+        "likes": 1,
+        "reason": "The message is a polite greeting and test note with no prohibited content.",
+        "rejected_id": -1,
+        "replies": 1,
+        "text": "Good morning from WallAI v2! Testing replies, likes and appeals on GenLayer today. Have a great week :)",
+        "timestamp": 1791167807,
+        "via_appeal": false
       }
     ],
-    "authorStats": {
-      "approved": 1,
-      "last_rejection_reason": "Contains scam/crypto phishing, a suspicious link, and insulting harassment.",
-      "rejected": 1
+    "rejected": [
+      {
+        "appeal_reason": "Clear crypto phishing scam with suspicious link and insulting users; uphold rejection.",
+        "appeal_status": "denied",
+        "appeal_timestamp": 1791167850,
+        "author": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+        "handle": "demo_bb9e",
+        "id": 0,
+        "message_id": -1,
+        "reason": "Contains a scam/phishing crypto offer, suspicious link, and insulting language.",
+        "text": "",
+        "timestamp": 1791167823
+      }
+    ],
+    "replies": [
+      {
+        "author": "0x1A8De806617E27DdDE786013f162b499e777DBa8",
+        "handle": "friend_1a8de8",
+        "id": 0,
+        "message_id": 0,
+        "reason": "Positive polite message with no prohibited content.",
+        "text": "Congrats on shipping v2, this looks great!",
+        "timestamp": 1791167872
+      }
+    ],
+    "leaderboard": [
+      {
+        "address": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+        "approved": 2,
+        "handle": "demo_bb9e",
+        "likes_received": 1,
+        "rejected": 1,
+        "replies": 0
+      },
+      {
+        "address": "0x1A8De806617E27DdDE786013f162b499e777DBa8",
+        "approved": 0,
+        "handle": "friend_1a8de8",
+        "likes_received": 0,
+        "rejected": 0,
+        "replies": 1
+      }
+    ],
+    "bLikedTarget": true,
+    "authorStatsA": {
+      "approved": 2,
+      "handle": "demo_bb9e",
+      "last_rejection_reason": "Contains a scam/phishing crypto offer, suspicious link, and insulting language.",
+      "likes_received": 1,
+      "rejected": 1,
+      "replies": 0
     }
   },
-  "finishedAt": "2026-10-05T01:14:16.390Z"
+  "checks": {
+    "rejected view hides text": true,
+    "reply visible": true,
+    "like recorded": true,
+    "leaderboard has A": true,
+    "handle shown on messages": true
+  },
+  "appealProbe": [
+    {
+      "text": "PSA: never share your seed phrase or private key with anyone, not even 'support' in DMs. Real admins will never ask for it.",
+      "post": {
+        "method": "post_message",
+        "txHash": "0x450241ab14080be280fa97b2f1553d0da10ff70720fc1041bdab83e42b374f92",
+        "explorer": "https://explorer-studio.genlayer.com/transactions/0x450241ab14080be280fa97b2f1553d0da10ff70720fc1041bdab83e42b374f92",
+        "statusName": "ACCEPTED",
+        "executionResult": "SUCCESS",
+        "returnValue": "{\"approved\":true\"id\":2\"reason\":\"Helpful security PSA warning against sharing keys; no violations.\"}",
+        "parsed": {
+          "approved": true,
+          "id": 2,
+          "reason": "Helpful security PSA warning against sharing keys; no violations."
+        }
+      }
+    },
+    {
+      "text": "Security tip: if someone asks for your seed phrase to 'verify your wallet', it is a scam. Block and report them.",
+      "post": {
+        "method": "post_message",
+        "txHash": "0x3aeafd9f997f5dde4cca523d6dbeccce9953a2077564df075181168fe25c3fa0",
+        "explorer": "https://explorer-studio.genlayer.com/transactions/0x3aeafd9f997f5dde4cca523d6dbeccce9953a2077564df075181168fe25c3fa0",
+        "statusName": "ACCEPTED",
+        "executionResult": "SUCCESS",
+        "returnValue": "{\"approved\":true\"id\":3\"reason\":\"Legitimate security awareness tip warning users about seed phrase scams.\"}",
+        "parsed": {
+          "approved": true,
+          "id": 3,
+          "reason": "Legitimate security awareness tip warning users about seed phrase scams."
+        }
+      }
+    }
+  ]
 }
