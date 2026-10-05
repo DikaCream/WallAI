@@ -2,10 +2,12 @@
 
 import { useWallet } from "@/lib/WalletProvider";
 import { CHAIN_NAME } from "@/lib/config";
-import { shortAddress } from "@/lib/format";
+import { displayName } from "@/lib/format";
+import { useAuthorStats } from "@/lib/hooks/useWall";
 
 export function Header() {
   const { address, isMetaMaskAvailable, isConnecting, isCorrectChain, connect, switchChain, disconnect } = useWallet();
+  const { data: me } = useAuthorStats(address);
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/5 bg-zinc-950/70 backdrop-blur">
@@ -18,7 +20,7 @@ export function Header() {
           </div>
           <div>
             <p className="text-base font-semibold tracking-tight">WallAI</p>
-            <p className="text-xs text-zinc-500">AI-moderated message wall</p>
+            <p className="text-xs text-zinc-500">AI-moderated social wall</p>
           </div>
         </div>
 
@@ -59,7 +61,7 @@ export function Header() {
               className="group flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 font-mono text-sm text-zinc-200 hover:border-white/20"
             >
               <span className="h-2 w-2 rounded-full bg-emerald-400" />
-              <span className="group-hover:hidden">{shortAddress(address)}</span>
+              <span className="group-hover:hidden">{displayName(me?.handle, address)}</span>
               <span className="hidden font-sans group-hover:inline">Disconnect</span>
             </button>
           )}

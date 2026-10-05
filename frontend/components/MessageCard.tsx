@@ -1,19 +1,27 @@
-import { addressHue, shortAddress, timeAgo } from "@/lib/format";
-import type { WallMessage } from "@/lib/wallai";
+"use client";
 
-export function MessageCard({ message, isMine }: { message: WallMessage; isMine: boolean }) {
-  const hue = addressHue(message.author);
+import { useState } from "react";
+import { displayName, timeAgo } from "@/lib/format";
+import type { WallMessage } from "@/lib/wallai";
+import { Avatar } from "./Avatar";
+import { LikeButton } from "./LikeButton";
+import { Replies } from "./Replies";
+
+export function MessageCard({ message, isMine, liked }: { message: WallMessage; isMine: boolean; liked: boolean }) {
+  const [open, setOpen] = useState(false);
   return (
     <article className="rounded-2xl border border-white/5 bg-white/[0.025] p-4 transition hover:border-white/10">
       <div className="flex items-center gap-3">
-        <div
-          className="h-8 w-8 shrink-0 rounded-full"
-          style={{ background: `linear-gradient(135deg, hsl(${hue} 70% 65%), hsl(${(hue + 60) % 360} 70% 45%))` }}
-        />
+        <Avatar address={message.author} />
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-2 font-mono text-sm text-zinc-300">
-            {shortAddress(message.author)}
-            {isMine && <span className="rounded bg-violet-500/15 px-1.5 py-0.5 font-sans text-[10px] font-medium text-violet-300">YOU</span>}
+          <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-300">
+            <span className={message.handle ? "font-medium" : "font-mono"} title={message.author}>
+              {displayName(message.handle, message.author)}
+            </span>
+            {isMine && <span className="rounded bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">YOU</span>}
+            {message.via_appeal && (
+              <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-200">APPROVED ON APPEAL</span>
+            )}
           </p>
           <p className="text-xs text-zinc-500">
             #{message.id} · {timeAgo(message.timestamp)}
@@ -24,9 +32,21 @@ export function MessageCard({ message, isMine }: { message: WallMessage; isMine:
       {message.reason && (
         <p className="mt-3 flex items-start gap-1.5 text-xs text-zinc-500">
           <span className="mt-px text-emerald-400">✓</span>
-          <span>AI moderator: {message.reason}</span>
+          <span>
+            {message.via_appeal ? "Appeal reviewer" : "AI moderator"}: {message.reason}
+          </span>
         </p>
       )}
+      <div className="mt-3 flex items-center gap-2 border-t border-white/5 pt-2">
+        <LikeButton messageId={message.id} likes={message.likes} liked={liked} isMine={isMine} />
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+        >
+          💬 <span className="tabular-nums">{message.replies}</span> {open ? "Hide replies" : message.replies === 1 ? "reply" : "replies"}
+        </button>
+      </div>
+      {open && <Replies messageId={message.id} />}
     </article>
   );
 }
