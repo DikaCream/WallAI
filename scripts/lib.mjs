@@ -1,6 +1,6 @@
 // Shared helpers for the Node scripts (deploy + e2e). Loads the wallet from .env.
 import "dotenv/config";
-import { createAccount, createClient } from "genlayer-js";
+import { createAccount, createClient, generatePrivateKey } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 
 export function getClient({ withAccount = true } = {}) {
@@ -14,6 +14,23 @@ export function getClient({ withAccount = true } = {}) {
     config.account = createAccount(pk);
   }
   return createClient(config);
+}
+
+// A throwaway in-memory wallet (never written to disk or printed). Studionet is gasless.
+export function getEphemeralClient() {
+  const endpoint = process.env.GENLAYER_RPC_URL || "https://studio.genlayer.com/api";
+  return createClient({ chain: studionet, endpoint, account: createAccount(generatePrivateKey()) });
+}
+
+// Studio's "readable" return payload is JSON-like but may omit commas; pull scalar fields out of it.
+export function parseReadable(readable) {
+  const out = {};
+  if (typeof readable !== "string") return out;
+  for (const m of readable.matchAll(/"(\w+)"\s*:\s*("(?:[^"\\]|\\.)*"|-?\d+|true|false)/g)) {
+    const raw = m[2];
+    out[m[1]] = raw.startsWith('"') ? JSON.parse(raw) : raw === "true" ? true : raw === "false" ? false : Number(raw);
+  }
+  return out;
 }
 
 // Recursively converts Maps / BigInts returned by genlayer-js into plain JSON-friendly values.
