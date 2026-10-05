@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "WallAI - an AI-moderated message wall on GenLayer Studionet",
+  "description": "WallAI - an AI-moderated social wall on GenLayer Studionet",
   "scripts": {
     "wallet:new": "node scripts/create-wallet.mjs",
     "deploy:studionet": "node scripts/deploy.mjs",
@@ -11,7 +11,8 @@
     "lint:contract": "genvm-lint check contracts/wall_ai.py",
     "test:contract": "pytest tests/direct/ -v",
     "dev": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build"
+    "build": "cd frontend && npm run build",
+    "probe:appeal": "node scripts/appeal-probe.mjs"
   },
   "dependencies": {
     "dotenv": "16.6.1",

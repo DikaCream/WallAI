@@ -1,0 +1,50 @@
+{
+  "contract": "0x7cD9D77c23024D21868dA19F9FD4cE723aE2241b",
+  "wallet": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+  "startedAt": "2026-10-05T01:13:44.906Z",
+  "posts": [
+    {
+      "label": "clean",
+      "text": "Hello from WallAI! Excited to try an AI-moderated wall on GenLayer. Have a great day everyone :)",
+      "txHash": "0xa3164fbd17d3d3d03114b9c19e1b0a0748b67fa4d26d739565fe5954ac478da4",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0xa3164fbd17d3d3d03114b9c19e1b0a0748b67fa4d26d739565fe5954ac478da4",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"approved\":true\"reason\":\"Friendly greeting with no policy violations\"}"
+    },
+    {
+      "label": "abusive/spam",
+      "text": "SEND ME YOUR SEED PHRASE NOW to claim 1000x FREE CRYPTO!!! Click bit.ly/fr33-m0ney - you are all worthless idiots",
+      "txHash": "0x5be5f67210b52193d0b2e9c8881cde61526df1f02797146b44cb6010b4e86410",
+      "explorer": "https://explorer-studio.genlayer.com/transactions/0x5be5f67210b52193d0b2e9c8881cde61526df1f02797146b44cb6010b4e86410",
+      "statusName": "ACCEPTED",
+      "consensusResult": "MAJORITY_AGREE",
+      "executionResult": "SUCCESS",
+      "returnValue": "{\"approved\":false\"reason\":\"Contains scam/crypto phishing, a suspicious link, and insulting harassment.\"}"
+    }
+  ],
+  "after": {
+    "stats": {
+      "approved": 1,
+      "rejected": 1,
+      "total": 2
+    },
+    "messageCount": 1,
+    "latestMessages": [
+      {
+        "author": "0xBb9E609bf277a0Ffb0018515d0a850037C2b17c3",
+        "id": 0,
+        "reason": "Friendly greeting with no policy violations",
+        "text": "Hello from WallAI! Excited to try an AI-moderated wall on GenLayer. Have a great day everyone :)",
+        "timestamp": 1791162826
+      }
+    ],
+    "authorStats": {
+      "approved": 1,
+      "last_rejection_reason": "Contains scam/crypto phishing, a suspicious link, and insulting harassment.",
+      "rejected": 1
+    }
+  },
+  "finishedAt": "2026-10-05T01:14:16.390Z"
+}
