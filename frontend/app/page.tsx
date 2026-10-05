@@ -3,7 +3,7 @@ import { HowItWorks } from "@/components/HowItWorks";
 import { MyActivity } from "@/components/MyActivity";
 import { PostForm } from "@/components/PostForm";
 import { StatsBar } from "@/components/StatsBar";
-import { Wall } from "@/components/Wall";
+import { Feed } from "@/components/Feed";
 import { CONTRACT_ADDRESS, EXPLORER_URL } from "@/lib/config";
 
 export default function Home() {
@@ -17,7 +17,8 @@ export default function Home() {
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-zinc-400">
             Post up to 280 characters. An intelligent contract on GenLayer asks LLM validators whether your message is
-            appropriate. Only approved messages make it onto the wall.
+            appropriate and you watch consensus happen live. Like, reply, claim a handle, climb the leaderboard, and
+            appeal if you think the AI got it wrong.
           </p>
         </div>
 
@@ -38,7 +39,7 @@ export default function Home() {
             </aside>
             <div className="space-y-6">
               <StatsBar />
-              <Wall />
+              <Feed />
             </div>
           </div>
         )}

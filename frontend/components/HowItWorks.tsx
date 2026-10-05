@@ -1,8 +1,9 @@
 const steps = [
-  ["Sign", "You submit post_message from MetaMask. Studionet is gasless."],
+  ["Sign", "You submit post_message from MetaMask. Studionet is gasless. Your post shows up instantly as pending."],
   ["Moderate", "The leader validator asks an LLM: approve or reject, and why?"],
-  ["Verify", "Other validators re-run the moderation and must reach the same decision."],
-  ["Publish", "Approved posts are stored on-chain; rejected ones are counted with the AI's reason."],
+  ["Verify", "Other validators re-run the moderation and must reach the same decision (Proposing → Committing → Revealing → Accepted)."],
+  ["Publish", "Approved posts go on the wall. Rejections are listed publicly with the AI's reason, but without the text."],
+  ["Appeal", "Think the AI got it wrong? Appeal once: a stricter senior reviewer weighs context and false positives."],
 ];
 
 export function HowItWorks() {

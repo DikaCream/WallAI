@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WalletProvider } from "@/lib/WalletProvider";
+import { PendingProvider } from "@/lib/PendingProvider";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -13,7 +14,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
   return (
     <QueryClientProvider client={queryClient}>
-      <WalletProvider>{children}</WalletProvider>
+      <WalletProvider>
+        <PendingProvider>{children}</PendingProvider>
+      </WalletProvider>
     </QueryClientProvider>
   );
 }
