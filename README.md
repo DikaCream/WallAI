@@ -99,7 +99,7 @@ scripts/schema-check.mjs      Asks Studionet to parse the contract and print its
 scripts/lib.mjs               Shared helpers (clients, receipt inspection, readable-payload parser)
 deployments/                  Deployment records and e2e results (v1 files kept for history)
 frontend/                     Next.js 16 app (genlayer-js + MetaMask, React Query, Tailwind 4)
-docs/ci.yml                   CI workflow (genvm-lint, direct tests, frontend build)
+.github/workflows/ci.yml      CI: genvm-lint, direct tests, frontend build
 docs/                         Live-status illustration (pending.svg)
 ```
 
@@ -122,9 +122,8 @@ genvm-lint check contracts/wall_ai.py   # GenVM static analysis + SDK validation
 pytest tests/direct/ -q                 # 18 direct-mode tests with mocked LLM responses
 ```
 
-A ready-made GitHub Actions workflow that runs these checks plus the frontend build is in
-[`docs/ci.yml`](docs/ci.yml). To enable it, copy it to `.github/workflows/ci.yml` (adding workflow
-files needs a GitHub token with the `workflow` scope, or use the GitHub web UI).
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs these checks plus the frontend
+build on every push to `main` and on pull requests.
 
 ## Deploy
 
