@@ -1,4 +1,4 @@
-// Typed wrapper around the WallAI intelligent contract using genlayer-js.
+// Typed wrapper around the WallAI v2 intelligent contract using genlayer-js.
 import { createClient } from "genlayer-js";
 import { studionet } from "genlayer-js/chains";
 import type { TransactionHash } from "genlayer-js/types";
@@ -8,27 +8,68 @@ import type { EthereumProvider } from "./wallet";
 export interface WallMessage {
   id: number;
   author: string;
+  handle: string;
   text: string;
   timestamp: number;
   reason: string;
+  via_appeal: boolean;
+  rejected_id: number;
+  likes: number;
+  replies: number;
+}
+
+export interface WallReply {
+  id: number;
+  message_id: number;
+  author: string;
+  handle: string;
+  text: string;
+  timestamp: number;
+  reason: string;
+}
+
+export interface RejectedPost {
+  id: number;
+  author: string;
+  handle: string;
+  timestamp: number;
+  reason: string;
+  appeal_status: "none" | "denied" | "overturned";
+  appeal_reason: string;
+  appeal_timestamp: number;
+  message_id: number;
+  text: string;
 }
 
 export interface WallStats {
   approved: number;
   rejected: number;
   total: number;
+  appeals: number;
+  overturned: number;
+  replies: number;
+  rejected_replies: number;
+  likes: number;
+  users: number;
 }
 
 export interface AuthorStats {
   approved: number;
   rejected: number;
+  replies: number;
+  likes_received: number;
   last_rejection_reason: string;
+  handle: string;
 }
 
-export type PostOutcome =
-  | { kind: "approved"; reason: string; txHash: string }
-  | { kind: "rejected"; reason: string; txHash: string }
-  | { kind: "error"; reason: string; txHash?: string };
+export interface LeaderboardRow {
+  address: string;
+  handle: string;
+  approved: number;
+  likes_received: number;
+  replies: number;
+  rejected: number;
+}
 
 // genlayer-js decodes contract dicts as Map and ints as bigint; normalize to plain JSON values.
 export function toPlain(value: unknown): any {
@@ -60,80 +101,153 @@ async function read<T>(functionName: string, args: any[] = []): Promise<T> {
 }
 
 export const getMessages = (offset: number, limit: number) => read<WallMessage[]>("get_messages", [offset, limit]);
-export const getMessageCount = () => read<number>("get_message_count");
+export const getReplies = (id: number, offset: number, limit: number) =>
+  read<WallReply[]>("get_replies", [id, offset, limit]);
+export const getRejected = (offset: number, limit: number) => read<RejectedPost[]>("get_rejected", [offset, limit]);
 export const getStats = () => read<WallStats>("get_stats");
 export const getAuthorStats = (author: string) => read<AuthorStats>("get_author_stats", [author]);
+export const getLeaderboard = (limit: number) => read<LeaderboardRow[]>("get_leaderboard", [limit]);
+export const getLiked = (author: string, ids: number[]) => read<boolean[]>("get_liked", [author, ids]);
 
-/** Parses the contract return value ({approved, reason}) from Studio's "readable" payload. */
-function parseReadableDecision(readable: unknown): { approved: boolean; reason: string } | null {
-  if (typeof readable !== "string") return null;
-  const approved = readable.match(/"approved"\s*:\s*(true|false)/);
-  if (!approved) return null;
-  const reason = readable.match(/"reason"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-  let reasonText = "";
-  if (reason) {
+// ------------------------------------------------------------------ transactions
+
+/** Consensus steps shown in the UI, in order (from the transaction's statusName). */
+export const TX_STEPS = ["PENDING", "PROPOSING", "COMMITTING", "REVEALING", "ACCEPTED", "FINALIZED"] as const;
+const DONE = new Set(["ACCEPTED", "FINALIZED"]);
+export const FAILED_STATUSES = new Set(["UNDETERMINED", "CANCELED", "LEADER_TIMEOUT", "VALIDATORS_TIMEOUT"]);
+
+export interface TxCallbacks {
+  onHash?: (hash: string) => void;
+  onStatus?: (status: string) => void;
+}
+
+export interface TxResult {
+  hash: string;
+  statusName: string;
+  values: Record<string, unknown>;
+}
+
+export class TxError extends Error {
+  hash?: string;
+  constructor(message: string, hash?: string) {
+    super(message);
+    this.hash = hash;
+  }
+}
+
+/** Studio's "readable" return payload is JSON-like but may omit commas; extract scalar fields. */
+export function parseReadable(readable: unknown): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (typeof readable !== "string") return out;
+  for (const m of readable.matchAll(/"(\w+)"\s*:\s*("(?:[^"\\]|\\.)*"|-?\d+|true|false)/g)) {
+    const raw = m[2];
     try {
-      reasonText = JSON.parse(`"${reason[1]}"`);
+      out[m[1]] = raw.startsWith('"') ? JSON.parse(raw) : raw === "true" ? true : raw === "false" ? false : Number(raw);
     } catch {
-      reasonText = reason[1];
+      out[m[1]] = raw.slice(1, -1);
     }
   }
-  return { approved: approved[1] === "true", reason: reasonText };
+  return out;
+}
+
+function cleanError(raw: unknown): string {
+  const text = String(raw ?? "").trim();
+  if (!text) return "The contract rejected the transaction";
+  const quoted = text.match(/"([^"]{3,200})"/);
+  return (quoted ? quoted[1] : text).slice(0, 200);
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function fetchTx(hash: string): Promise<any | null> {
+  try {
+    return await readClient.getTransaction({ hash: hash as TransactionHash });
+  } catch {
+    return null;
+  }
+}
+
+async function watchFinalized(hash: string, onStatus: (s: string) => void) {
+  const deadline = Date.now() + 3 * 60_000;
+  while (Date.now() < deadline) {
+    await sleep(5000);
+    const tx = await fetchTx(hash);
+    if (tx?.statusName === "FINALIZED") return onStatus("FINALIZED");
+  }
 }
 
 /**
- * Submits post_message through MetaMask, waits for consensus (ACCEPTED) and returns the
- * AI moderation outcome. The decision is read from the leader receipt, with a fallback
- * to comparing the author's on-chain stats before/after the transaction.
+ * Sends a write through MetaMask, then polls the transaction and reports every consensus
+ * status change (PENDING → PROPOSING → COMMITTING → REVEALING → ACCEPTED → FINALIZED).
  */
+export async function sendTx(
+  author: `0x${string}`,
+  provider: EthereumProvider,
+  functionName: string,
+  args: unknown[],
+  cb: TxCallbacks = {},
+): Promise<TxResult> {
+  const address = requireAddress();
+  const writeClient = createClient({ chain: studionet, endpoint: RPC_URL, account: author, provider: provider as any });
+  const hash: string = await writeClient.writeContract({ address, functionName, args: args as any, value: BigInt(0) });
+  cb.onHash?.(hash);
+  cb.onStatus?.("PENDING");
+
+  let status = "PENDING";
+  let tx: any = null;
+  const deadline = Date.now() + 6 * 60_000;
+  while (Date.now() < deadline) {
+    await sleep(2000);
+    const next = await fetchTx(hash);
+    if (!next) continue;
+    tx = next;
+    const s = String(tx.statusName ?? status);
+    if (s !== status) {
+      status = s;
+      cb.onStatus?.(s);
+    }
+    if (DONE.has(s) || FAILED_STATUSES.has(s)) break;
+  }
+  if (!DONE.has(status)) {
+    throw new TxError(
+      FAILED_STATUSES.has(status)
+        ? `Validators could not agree (status: ${status})`
+        : `Still ${status.toLowerCase()} after 6 minutes. Studionet may be busy; the transaction can still complete, check the explorer.`,
+      hash,
+    );
+  }
+
+  const receipts = tx?.consensus_data?.leader_receipt;
+  const leader = Array.isArray(receipts) ? receipts[0] : receipts;
+  const readable = leader?.result?.payload?.readable;
+  if (leader?.execution_result && leader.execution_result !== "SUCCESS") {
+    throw new TxError(cleanError(readable || leader?.genvm_result?.stderr), hash);
+  }
+  if (status === "ACCEPTED" && cb.onStatus) void watchFinalized(hash, cb.onStatus);
+  return { hash, statusName: status, values: parseReadable(readable) };
+}
+
+export type PostOutcome = { kind: "approved" | "rejected"; reason: string; id: number; txHash: string };
+
+/** post_message with an on-chain fallback if the return value cannot be parsed. */
 export async function postMessage(
   author: `0x${string}`,
   provider: EthereumProvider,
   text: string,
-  onSubmitted?: (txHash: string) => void,
+  cb: TxCallbacks = {},
 ): Promise<PostOutcome> {
-  const address = requireAddress();
   const before = await getAuthorStats(author).catch(() => null);
-
-  const writeClient = createClient({ chain: studionet, endpoint: RPC_URL, account: author, provider: provider as any });
-  const txHash: string = await writeClient.writeContract({
-    address,
-    functionName: "post_message",
-    args: [text],
-    value: BigInt(0),
-  });
-  onSubmitted?.(txHash);
-
-  await readClient.waitForTransactionReceipt({
-    hash: txHash as TransactionHash,
-    status: "ACCEPTED" as any,
-    interval: 3000,
-    retries: 100,
-  });
-
-  const tx: any = await readClient.getTransaction({ hash: txHash as TransactionHash });
-  const receipts = tx?.consensus_data?.leader_receipt;
-  const leader = Array.isArray(receipts) ? receipts[0] : receipts;
-  const statusName: string | undefined = tx?.statusName;
-
-  if (statusName && !["ACCEPTED", "FINALIZED"].includes(statusName)) {
-    return { kind: "error", reason: `Validators could not agree (status: ${statusName})`, txHash };
+  const res = await sendTx(author, provider, "post_message", [text], cb);
+  const v = res.values;
+  if (typeof v.approved === "boolean") {
+    return { kind: v.approved ? "approved" : "rejected", reason: String(v.reason ?? ""), id: Number(v.id ?? -1), txHash: res.hash };
   }
-  if (leader?.execution_result && leader.execution_result !== "SUCCESS") {
-    const message =
-      leader?.result?.payload?.readable || leader?.genvm_result?.stderr || "The contract rejected the transaction";
-    return { kind: "error", reason: String(message).slice(0, 300), txHash };
-  }
-
-  const decision = parseReadableDecision(leader?.result?.payload?.readable);
-  if (decision) {
-    return { kind: decision.approved ? "approved" : "rejected", reason: decision.reason, txHash };
-  }
-
-  // Fallback: infer the outcome from state changes.
   const after = await getAuthorStats(author);
-  if (before && after.rejected > before.rejected) {
-    return { kind: "rejected", reason: after.last_rejection_reason, txHash };
-  }
-  return { kind: "approved", reason: "Approved by the AI moderator", txHash };
+  const rejected = !!before && after.rejected > before.rejected;
+  return {
+    kind: rejected ? "rejected" : "approved",
+    reason: rejected ? after.last_rejection_reason : "Approved by the AI moderator",
+    id: -1,
+    txHash: res.hash,
+  };
 }
